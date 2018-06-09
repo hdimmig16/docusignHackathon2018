@@ -21,28 +21,169 @@
   <base target="_blank">
 
   <title>getUserMedia</title>
-  <link href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet" type="text/css">
+  <link href="https://unpkg.com/vuetify/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
 
 </head>
 
 <body>
-
-  <div id="container">
-
-    <video id="gum-local" autoplay playsinline></video>
-
-    <div id="errorMsg"></div>
-
-    <p class="warning"><strong>Warning:</strong> if you're not using headphones, pressing play will cause feedback.</p>
-
-    <p>Display the video stream from <code>getUserMedia()</code> in a video element.</p>
-
-    <p>The <code>MediaStream</code> object <code>stream</code> passed to the <code>getUserMedia()</code> callback is in global scope, so you can inspect it from the console.</p>
-
+  <div id="app">
+    <v-app>
+      <v-content>
+        <v-container>
+          <v-layout>
+              <canvas v-show="showCanvas"></canvas>
+          </v-layout>
+          <v-layout wrap>
+            <v-flex xs12>
+                <v-btn 
+                v-show="showEnableCameraButton"
+                :color="showVideoFeed ? 'error' : 'info'"
+                @click.native.stop="showVideoFeed ?  disableCamera() : enableCamera()"
+                >
+                  {{  showVideoFeed ? 'Disable Camera' : 'Enable Camera Access' }}
+                </v-btn>
+                <v-btn 
+                  v-show="showVideoFeed"
+                  color="info"
+                  @click.native.stop="takePhoto"
+                >
+                  Take Photo
+                </v-btn>
+                <v-btn 
+                  v-show="photo && showVideoFeed"
+                  :color="showCanvas ? 'warning' : 'success'"
+                  @click.native.stop="showCanvas = !showCanvas"
+                >
+                {{  showCanvas ? 'Hide Photo' : 'Show Photo' }}
+                </v-btn>
+                
+            </v-flex>
+            <v-flex xs12 v-show="showVideoFeed">
+                <camera 
+                  ref="camera" 
+                  class="elevation-1"
+                />
+            </v-flex>
+          </v-layout>
+        
+            <p class="warning"><strong>Warning:</strong> if you're not using headphones, pressing play will cause feedback.</p>
+        
+            <p>Display the video stream from <code>getUserMedia()</code> in a video element.</p>
+        
+            <p>The <code>MediaStream</code> object <code>stream</code> passed to the <code>getUserMedia()</code> callback is in global scope, so you can inspect it from the console.</p>
+        </v-container>
+      </v-content>
+    </v-app>
   </div>
 
-  <script type='text/javascript' src="./js/webRTCAdapter.js"></script>
-  <script type='text/javascript' src="./js/webRTC.js"></script>
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
+  <script src="https://unpkg.com/vuetify/dist/vuetify.js"></script>
+  <script type='text/javascript' src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+  <!-- <script type='text/javascript' src="./js/webRTC.js"></script> -->
+  <script>
+      const camera = Vue.component('camera', {
+        template: `<video autoplay playsinline ref="innerCamera"/>`,
+        data() {
+          return {
+            stream: null,
+            constraints: {
+              audio: false,
+              video: {
+                width: 640, // must be fixed at 640 to work on Safari (iPhone!)
+                deviceId: null, // tbd
+                facingMode: "user" // force front-facing camera
+              }
+            }
+          }
+        },
+        methods: {
+          connectToCamera(){
+            return new Promise((resolve, reject) => {
+              navigator.mediaDevices.getUserMedia(this.constraints)
+              .then((stream) => {
+                this.stream = stream;
+                this.$el.srcObject = stream; 
+                console.log('connected to camera');
+                resolve(stream)
+              })
+              .catch((err) => {
+                console.error(`${err.name}: ${err.message}`);
+                reject(`${err.name}: ${err.message}`)
+              });
+            })
+          }
+        },
+        mounted() {
+          navigator.mediaDevices.enumerateDevices()
+          .then((devices) => {
+            devices = devices.filter(v => (v.kind === 'videoinput'));
+            if(devices.length === 0) {
+              const error = 'There are no supported video devices';
+              console.error(error)
+              alert(error)
+              return;
+            }
 
+            // otherwise, at least 1 video device 
+            console.log(`Found ${devices.length} video devices`);
+            // alert(`Found ${devices.length} video devices`)
+
+            // get front-facing cameras by default
+            frontFacingCameras = devices.filter(v => (v.label.includes('front') || v.label.includes('user')));
+            this.constraints.video.deviceId = frontFacingCameras.length === 1 ? frontFacingCameras[0].deviceId : devices[0].deviceId;
+          })
+          .catch((err) => {
+            console.error(`${err.name}: ${err.message}`);
+          });
+        },
+      })
+      new Vue({ 
+        el: '#app',
+        components: {
+          camera
+        },
+        data() {
+          return {
+            showEnableCameraButton: false,
+            showVideoFeed: false,
+            showCanvas: false,
+            photo: null
+          }
+        },
+        mounted() {
+          this.$watch(() => {return this.$refs.camera.constraints.video.deviceId},
+          (newId, oldId) => {
+            console.log(`oldId: ${oldId}, newId: ${newId}`)
+            if(newId){ // if camera
+              this.showEnableCameraButton = true;
+            }
+          })
+        },
+        methods: {
+          takePhoto() {
+            var canvas = window.canvas = document.querySelector('canvas');
+            canvas.width = this.$refs.camera.$refs.innerCamera.videoWidth;
+            canvas.height = this.$refs.camera.$refs.innerCamera.videoHeight;
+            canvas.getContext('2d').drawImage(this.$refs.camera.$refs.innerCamera, 0, 0, canvas.width, canvas.height);
+            this.photo = canvas.toDataURL('image/png');
+          },
+          enableCamera() {
+            this.$refs.camera.connectToCamera()
+            .then(stream => {
+              console.log(stream);
+              this.showVideoFeed = true;
+            })
+            .catch(console.error);
+          },
+          disableCamera() {
+            this.$refs.camera.stream.getTracks()[0].stop();
+            this.showVideoFeed = false;
+          }
+        }
+       })
+  </script>
 </body>
 </html>
