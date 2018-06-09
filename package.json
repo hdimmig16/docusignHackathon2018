@@ -1,0 +1,31 @@
+{
+  "name": "docusign-hackathon-2018",
+  "version": "0.0.1",
+  "description": "Roger, Harrison, and Guillermo's hackathon project",
+  "main": "index.js",
+  "scripts": {
+    "build": "babel src --presets env -d ./dist",
+    "debug": "NODE_ENV=dev nodemon --inspect=5858 --exec babel-node index.js",
+    "dev": "NODE_ENV=dev nodemon --exec babel-node index.js",
+    "prebuild": "rm -rf dist/*",
+    "start": "NODE_ENV=production node index.js"
+  },
+  "author": "harrion@certainlending.com",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "babel-polyfill": "^6.26.0",
+    "body-parser": "^1.18.2",
+    "dotenv": "^5.0.1",
+    "express": "^4.16.3"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.12.0",
+    "nodemon": "^1.17.3"
+  }
+}
