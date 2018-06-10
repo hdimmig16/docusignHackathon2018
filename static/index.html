@@ -101,6 +101,14 @@
                         <v-flex xs12>
                             <v-btn 
                               v-show="showEnableCameraButton"
+                              :color="'info'"
+                              @click.native.stop="goSign()"
+                              :href=`https://certainlabs.com/docusign`
+                            >
+                              Sign Document
+                            </v-btn>                          
+                            <v-btn 
+                              v-show="showEnableCameraButton"
                               :color="showVideoFeed ? 'error' : 'info'"
                               @click.native.stop="showVideoFeed ?  disableCamera() : enableCamera()"
                             >
@@ -433,6 +441,14 @@
           // });
         },
         methods: {
+          goSign() {
+            axios.get('/docusign')
+            .then(response => {
+              console.log(response);
+            })
+            .catch(console.error)            
+
+          },
           getSessions() {
             axios.get('/api/sessions')
             .then(response => {
