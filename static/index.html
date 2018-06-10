@@ -10,20 +10,18 @@
 <head>
 
   <meta charset="utf-8">
-  <meta name="description" content="WebRTC code samples">
-  <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
-  <meta itemprop="description" content="Client-side WebRTC code samples">
-  <meta itemprop="image" content="../../../images/webrtc-icon-192x192.png">
-  <meta itemprop="name" content="WebRTC code samples">
+  <meta name="description" content="DocuSign Hackathon Project">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <meta itemprop="description" content="Roger Hu &amp; Harrison Dimmig's DocuSign Hackathon Project">
+  <meta itemprop="name" content="DocuSign Hackathon Project">
   <meta name="mobile-web-app-capable" content="yes">
   <meta id="theme-color" name="theme-color" content="#ffffff">
 
   <base target="_blank">
 
-  <title>getUserMedia</title>
+  <title>Roger Hu &amp; Harrison Dimmig's DocuSign Hackathon Project</title>
   <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet" type="text/css">
   <link href="https://unpkg.com/vuetify/dist/vuetify.min.css" rel="stylesheet">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 
 
 </head>
@@ -37,8 +35,9 @@
       >
         <v-spacer></v-spacer>
         <v-menu offset-y>
-            <v-btn slot="activator" icon color="primary" dark>
+            <v-btn slot="activator" color="primary" dark flat>
               <v-icon color="white">person</v-icon>
+              <span class="white--text">&nbsp; &nbsp;{{ ownName }}</span>
             </v-btn>
             <v-list>
               <v-subheader>Current User</v-subheader>      
@@ -51,16 +50,7 @@
                 <v-list-tile-title>{{ user }}</v-list-tile-title>
               </v-list-tile>
             </v-list>
-        </v-menu>        
-        <!-- <v-btn
-          icon
-          round
-        >
-          <v-icon>
-            person
-          </v-icon>
-        </v-btn>   -->
-        
+        </v-menu>    
       </v-toolbar>
       <v-content>
         <v-container :style="{'color': 'white', 'height':'25vh', 'min-height': 'min-content'}">
@@ -89,7 +79,7 @@
                       <v-layout wrap text-xs-center></v-layout>
                         <v-flex xs12 class="title mb-3 mt-3" v-if="showEnableCameraButton"> Your device supports a webcam – Check out our new features!</v-flex>
                         <v-flex xs12 class="mb-3 mt-3" v-if="showEnableCameraButton">
-                          <v-subheading class="title">Choose Session</v-subheading>
+                          <p class="title mt-5">Choose Session:</p>
                           <v-select
                             :items="sessions"
                             v-model="selectedSession"
@@ -135,7 +125,7 @@
               </v-btn> -->
             <v-layout row>
               <v-flex xs12 md6>
-                  <v-toolbar-title class="pl-0 ml-0">
+                  <v-toolbar-title class="pl-0 ml-0" v-show="showVideoFeed">
                     {{ ownName }}
                     <v-icon
                       v-if="ownIdentityVerified" 
@@ -153,8 +143,8 @@
                 />    
               </v-flex>
               <v-flex xs12 md6>
-                <v-toolbar-title class="pl-0 ml-0">
-                  {{ peerName }}
+                <v-toolbar-title class="pl-0 ml-0" v-if="peerName">
+                  Peer: {{ peerName }}
                   <v-icon
                     v-if="peerVerified" 
                     medium
@@ -179,7 +169,6 @@
   <script type='text/javascript' src="./js/simplewebrtc-with-adapter.bundle.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
-  <!-- <script type='text/javascript' src="./js/webRTC.js"></script> -->
   <script>
       const camera = Vue.component('camera', {
         template: `<video autoplay playsinline ref="innerCamera"/>`,
@@ -271,7 +260,8 @@
             ],
             sessions: [],
             selectedSession: 'default-room',
-            newSessionName: null
+            newSessionName: null,
+            webrtc: null
           }
         },
         mounted() {
@@ -296,7 +286,7 @@
               // the id/element dom element that will hold remote videos
               remoteVideosEl: '',
               // immediately ask for camera access
-              autoRequestMedia: true,
+              autoRequestMedia: false,
               debug: false,
               detectSpeakingEvents: true,
           });
@@ -384,53 +374,6 @@
               //showVolume(document.getElementById('localVolume'), volume);
           });
           this.webrtc = webrtc;
-          // // Since we use this twice we put it here
-          // function setRoom(name) {
-          //     $('form').remove();
-          //     $('h1').text(name);
-          //     $('#subTitle').text('Link to join: ' + location.href);
-          //     $('body').addClass('active');
-          // }
-          // if (room) {
-          //     setRoom(room);
-          // } else {
-          //     $('form').submit(function () {
-          //         var val = $('#sessionInput').val().toLowerCase().replace(/\s/g, '-').replace(/[^A-Za-z0-9_\-]/g, '');
-          //         webrtc.createRoom(val, function (err, name) {
-          //             console.log(' create room cb', arguments);
-          //             var newUrl = location.pathname + '?' + name;
-          //             if (!err) {
-          //                 history.replaceState({foo: 'bar'}, null, newUrl);
-          //                 setRoom(name);
-          //             } else {
-          //                 console.log(err);
-          //             }
-          //         });
-          //         return false;
-          //     });
-          // }
-          // var button = $('#screenShareButton'),
-          //     setButton = function (bool) {
-          //         button.text(bool ? 'share screen' : 'stop sharing');
-          //     };
-          // webrtc.on('localScreenStopped', function () {
-          //     setButton(true);
-          // });
-          // setButton(true);
-          // button.click(function () {
-          //     if (webrtc.getLocalScreen()) {
-          //         webrtc.stopScreenShare();
-          //         setButton(true);
-          //     } else {
-          //         webrtc.shareScreen(function (err) {
-          //             if (err) {
-          //                 setButton(true);
-          //             } else {
-          //                 setButton(false);
-          //             }
-          //         });
-          //     }
-          // });
         },
         methods: {
           getSessions() {
@@ -505,6 +448,8 @@
             .then(stream => {
               console.log(stream);
               this.showVideoFeed = true;
+              console.log('startLocalVideo')
+              this.webrtc.startLocalVideo()
             })
             .catch(console.error);
           },
