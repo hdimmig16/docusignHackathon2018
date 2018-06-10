@@ -35,7 +35,8 @@ if(process.env.NODE_ENV === 'production') {
   console.log("Running production");
   // route registration
   server.use('/api', require('./dist/routes/test'));
-
+  server.use('/api', require('./dist/routes/identity.js'));
+  server.use('/api', require('./src/routes/cloudStorage.js'));
 }
 
 // dev routes
@@ -43,6 +44,8 @@ else if(process.env.NODE_ENV === 'dev'){
   console.log("Running development");
   // route registration
   server.use('/api', require('./src/routes/test'));
+  server.use('/api', require('./src/routes/identity.js'));
+  server.use('/api', require('./src/routes/cloudStorage.js'));
 
 }
 
