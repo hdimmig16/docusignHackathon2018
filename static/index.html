@@ -88,6 +88,16 @@
                       <v-divider class="mb-4 mt-4"></v-divider>
                       <v-layout wrap text-xs-center></v-layout>
                         <v-flex xs12 class="title mb-3 mt-3" v-if="showEnableCameraButton"> Your device supports a webcam – Check out our new features!</v-flex>
+                        <v-flex xs12 class="mb-3 mt-3" v-if="showEnableCameraButton">
+                          <v-subheading class="title">Choose Session</v-subheading>
+                          <v-select
+                            :items="sessions"
+                            v-model="selectedSession"
+                            label="Select a session"
+                            single-line
+                          >
+                          </v-select> 
+                        </v-flex>
                         <v-flex xs12>
                             <v-btn 
                               v-show="showEnableCameraButton"
@@ -258,7 +268,10 @@
               'Tom Casey',
               'Roger Hu',
               'Harrison Dimmig'
-            ]
+            ],
+            sessions: [],
+            selectedSession: 'default-room',
+            newSessionName: null
           }
         },
         mounted() {
@@ -269,9 +282,13 @@
               this.showEnableCameraButton = true;
             }
           })
-
+          this.$watch(() => {return this.selectedSession},
+          (newId, oldId) => {
+            this.webrtc.emit('joinNewRoom');
+          })
+          this.getSessions();
           // grab the room from the URL
-          var room = 'test-room-roger2'//location.search && location.search.split('?')[1];
+          var room = this.selectedSession;
           // create our webrtc connection
           let webrtc = new SimpleWebRTC({
               // the id/element dom element that will hold "our" video
@@ -285,9 +302,6 @@
           });
           // when it's ready, join if we got a room from the URL
           webrtc.on('readyToCall', function () {
-              // you can name it anything
-              // console.log('Web RTC');
-              // console.log(this.webrtc);
               if (room) {
                 //webrtc.sendToAll('chat', {data: 'this is my message'})
                 console.log(`joining room ${room}`);
@@ -297,6 +311,16 @@
                 });
               }
           });
+          webrtc.on('joinNewRoom', function () {
+              if (this.selectedSession) {
+                //webrtc.sendToAll('chat', {data: 'this is my message'})
+                console.log(`joining room ${this.selectedSession}`);
+                webrtc.joinRoom(this.selectedSession, () => {
+                  webrtc.emit('sendIdentity');
+                  webrtc.emit('sendVerificationStatus');
+                });
+              }
+          }.bind(this));
           webrtc.on('sendVerificationStatus', function() {
             console.log('caught verification status event');
             //console.log({type: 'verification', value: this.ownIdentityVerified});
@@ -409,6 +433,15 @@
           // });
         },
         methods: {
+          getSessions() {
+            axios.get('/api/sessions')
+            .then(response => {
+              const values = response.data.data.map(x => x.session_name);
+              this.sessions = values;
+              console.log(this.sessions);
+            })
+            .catch(console.error)            
+          },
           changeUser(name) {
             console.log(name);
             this.ownName = name;

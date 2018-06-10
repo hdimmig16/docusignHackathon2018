@@ -18,6 +18,7 @@
     "url": "https://github.com/hdimmig16/docusignHackathon2018.git"
   },
   "dependencies": {
+    "@google-cloud/datastore": "^1.4.0",
     "@google-cloud/storage": "^1.7.0",
     "axios": "^0.18.0",
     "babel-polyfill": "^6.26.0",
