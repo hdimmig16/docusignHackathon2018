@@ -2,6 +2,8 @@
 .env
 googleCreds.json
 googleDatastoreCreds.json
+docusign-key-pair.txt
+docusign_private_key.txt
 env.json
 node_modules/
 /dist/
