@@ -7,6 +7,3 @@ automatic_scaling:
   max_num_instances: 3
   cpu_utilization:
     target_utilization: 0.5
-
-url: /.*
-  secure: always
