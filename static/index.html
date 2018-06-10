@@ -10,20 +10,18 @@
 <head>
 
   <meta charset="utf-8">
-  <meta name="description" content="WebRTC code samples">
-  <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
-  <meta itemprop="description" content="Client-side WebRTC code samples">
-  <meta itemprop="image" content="../../../images/webrtc-icon-192x192.png">
-  <meta itemprop="name" content="WebRTC code samples">
+  <meta name="description" content="DocuSign Hackathon Project">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <meta itemprop="description" content="Roger Hu &amp; Harrison Dimmig's DocuSign Hackathon Project">
+  <meta itemprop="name" content="DocuSign Hackathon Project">
   <meta name="mobile-web-app-capable" content="yes">
   <meta id="theme-color" name="theme-color" content="#ffffff">
 
   <base target="_blank">
 
-  <title>getUserMedia</title>
+  <title>Roger Hu &amp; Harrison Dimmig's DocuSign Hackathon Project</title>
   <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet" type="text/css">
   <link href="https://unpkg.com/vuetify/dist/vuetify.min.css" rel="stylesheet">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 
 
 </head>
@@ -37,8 +35,9 @@
       >
         <v-spacer></v-spacer>
         <v-menu offset-y>
-            <v-btn slot="activator" icon color="primary" dark>
+            <v-btn slot="activator" color="primary" dark flat>
               <v-icon color="white">person</v-icon>
+              <span class="white--text">&nbsp; &nbsp;{{ ownName }}</span>
             </v-btn>
             <v-list>
               <v-subheader>Current User</v-subheader>      
@@ -51,24 +50,15 @@
                 <v-list-tile-title>{{ user }}</v-list-tile-title>
               </v-list-tile>
             </v-list>
-        </v-menu>        
-        <!-- <v-btn
-          icon
-          round
-        >
-          <v-icon>
-            person
-          </v-icon>
-        </v-btn>   -->
-        
+        </v-menu>    
       </v-toolbar>
       <v-content>
         <v-container :style="{'color': 'white', 'height':'25vh', 'min-height': 'min-content'}">
-            <v-jumbotron color="grey lighten-2" height="min-content">
+            <v-jumbotron color="white" class="elevation-1" height="min-content">
                 <v-container fill-height>
                   <v-layout align-center text-xs-center>
                     <v-flex>
-                      <h3 class="display-2">
+                      <h3 class="display-2 mt-5">
                         <v-layout wrap v-if="$vuetify.breakpoint.xsOnly">
                           <v-flex xs12 sm6>
                               Putting a <v-icon large class="info--text">face</v-icon> 
@@ -83,13 +73,37 @@
                             to a private <v-icon large class="info--text">vpn_key</v-icon>  
                         </div>
                       </h3>
-                      <p class="title mt-2">Facial recognition and photo confirmation for DocuSign</p>
-                      <p class="subheading mt-4">We all know DocuSign meets legal requirements – More than 300,000 businesses and organizations worldwide depend on just that. But some companies desire additional restrictions on exactly who can access documents and deeper insight into who <strong>really</strong> clicked sign.</p>
-                      <v-divider class="mb-4 mt-4"></v-divider>
-                      <v-layout wrap text-xs-center></v-layout>
+                      <p class="title mt-3">Facial recognition and photo confirmation for DocuSign</p>
+                      <v-flex xs8 offset-xs2>
+                          <p class="subheading mt-5 pt-3">We all know DocuSign meets legal requirements – More than 300,000 businesses and organizations worldwide depend on just that. But some companies desire additional restrictions on exactly who can access documents and deeper insight into who <strong>really</strong> clicked sign.</p>
+                      </v-flex>
+                      <v-divider class="mb-5 mt-5"></v-divider>
+                      <v-layout wrap text-xs-center>
+                        <v-flex xs12 class="mt-4 mb-5 pb-4 display-2">
+                          Built With:
+                        </v-flex>
+                        <v-flex xs12 sm4>
+                            <p class="display-1">WebRTC</p>
+                            <v-icon x-large color="info">swap_vert</v-icon>
+                            <p class="subheading">Open Source P2P Communication</p>
+                        </v-flex>
+                        <v-flex xs12 sm4>
+                            <p class="display-1">Facial Recognition</p>
+                            <v-icon x-large color="info">face</v-icon>
+                            <p class="subheading">Kairos API</p>
+                        </v-flex>
+                        <v-flex xs12 sm4>
+                            <p class="display-1">GCE + DocuSign</p>
+                            <v-icon x-large color="info">cloud</v-icon>
+                            <span class="title">&nbsp;+&nbsp;</span>
+                            <v-icon x-large color="info">insert_drive_file</v-icon>
+                            <p class="subheading">App Engine, Datastore, <br> Cloud Storage, Domains, <br> DocuSign Node SDK </p>
+                        </v-flex>
+                      </v-layout>
+                      <v-divider class="mb-5 mt-5"></v-divider>
                         <v-flex xs12 class="title mb-3 mt-3" v-if="showEnableCameraButton"> Your device supports a webcam – Check out our new features!</v-flex>
-                        <v-flex xs12 class="mb-3 mt-3" v-if="showEnableCameraButton">
-                          <v-subheading class="title">Choose Session</v-subheading>
+                        <v-flex xs12 sm8 offset-sm2 offset-xs0 class="mb-3 mt-3" v-if="showEnableCameraButton">
+                          <p class="title mt-5">Choose Session:</p>
                           <v-select
                             :items="sessions"
                             v-model="selectedSession"
@@ -133,7 +147,6 @@
           <v-layout align-center justify-center>
               <canvas v-show="showCanvas && showVideoFeed"></canvas>
           </v-layout>
-          <v-layout wrap align-center justify-center>            
               <!-- <v-btn 
                 v-show="photo && showVideoFeed"
                 :color="showCanvas ? 'warning' : 'success'"
@@ -141,9 +154,9 @@
               >
                 {{  showCanvas ? 'Hide Photo' : 'Show Photo' }}
               </v-btn> -->
-            <v-layout row>
-              <v-flex xs12 md6>
-                  <v-toolbar-title class="pl-0 ml-0">
+            <v-layout row justify-center>
+              <div>
+                  <v-toolbar-title class="pl-0 ml-0" v-show="showVideoFeed">
                     {{ ownName }}
                     <v-icon
                       v-if="ownIdentityVerified" 
@@ -159,10 +172,10 @@
                   ref="camera" 
                   class="elevation-0"
                 />    
-              </v-flex>
-              <v-flex xs12 md6>
-                <v-toolbar-title class="pl-0 ml-0">
-                  {{ peerName }}
+              </div>
+              <div :style="{'margin-left':'-175px'}">
+                <v-toolbar-title class="pl-0 ml-0" v-if="peerName">
+                  Peer: {{ peerName }}
                   <v-icon
                     v-if="peerVerified" 
                     medium
@@ -172,10 +185,9 @@
                   check_circle
                 </v-icon>
                 </v-toolbar-title>
-                <div id="remotes"></div> 
-              </v-flex>              
+                <div id="remotes"></div>
+              </div> 
             </v-layout>
-          </v-layout>
         </v-container>
       </v-content>
     </v-app>
@@ -187,7 +199,6 @@
   <script type='text/javascript' src="./js/simplewebrtc-with-adapter.bundle.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
-  <!-- <script type='text/javascript' src="./js/webRTC.js"></script> -->
   <script>
       const camera = Vue.component('camera', {
         template: `<video autoplay playsinline ref="innerCamera"/>`,
@@ -279,7 +290,8 @@
             ],
             sessions: [],
             selectedSession: 'default-room',
-            newSessionName: null
+            newSessionName: null,
+            webrtc: null
           }
         },
         mounted() {
@@ -304,7 +316,7 @@
               // the id/element dom element that will hold remote videos
               remoteVideosEl: '',
               // immediately ask for camera access
-              autoRequestMedia: true,
+              autoRequestMedia: false,
               debug: false,
               detectSpeakingEvents: true,
           });
@@ -392,53 +404,6 @@
               //showVolume(document.getElementById('localVolume'), volume);
           });
           this.webrtc = webrtc;
-          // // Since we use this twice we put it here
-          // function setRoom(name) {
-          //     $('form').remove();
-          //     $('h1').text(name);
-          //     $('#subTitle').text('Link to join: ' + location.href);
-          //     $('body').addClass('active');
-          // }
-          // if (room) {
-          //     setRoom(room);
-          // } else {
-          //     $('form').submit(function () {
-          //         var val = $('#sessionInput').val().toLowerCase().replace(/\s/g, '-').replace(/[^A-Za-z0-9_\-]/g, '');
-          //         webrtc.createRoom(val, function (err, name) {
-          //             console.log(' create room cb', arguments);
-          //             var newUrl = location.pathname + '?' + name;
-          //             if (!err) {
-          //                 history.replaceState({foo: 'bar'}, null, newUrl);
-          //                 setRoom(name);
-          //             } else {
-          //                 console.log(err);
-          //             }
-          //         });
-          //         return false;
-          //     });
-          // }
-          // var button = $('#screenShareButton'),
-          //     setButton = function (bool) {
-          //         button.text(bool ? 'share screen' : 'stop sharing');
-          //     };
-          // webrtc.on('localScreenStopped', function () {
-          //     setButton(true);
-          // });
-          // setButton(true);
-          // button.click(function () {
-          //     if (webrtc.getLocalScreen()) {
-          //         webrtc.stopScreenShare();
-          //         setButton(true);
-          //     } else {
-          //         webrtc.shareScreen(function (err) {
-          //             if (err) {
-          //                 setButton(true);
-          //             } else {
-          //                 setButton(false);
-          //             }
-          //         });
-          //     }
-          // });
         },
         methods: {
           goSign() {
@@ -521,6 +486,8 @@
             .then(stream => {
               console.log(stream);
               this.showVideoFeed = true;
+              console.log('startLocalVideo')
+              this.webrtc.startLocalVideo()
             })
             .catch(console.error);
           },
@@ -532,4 +499,11 @@
        })
   </script>
 </body>
+
+<style>
+    #remotes > .videoContainer > video {
+      max-height: 125px !important;
+      width: 175px !important;
+    }
+</style>
 </html>
