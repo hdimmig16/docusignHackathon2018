@@ -109,13 +109,6 @@
             />
 
           </v-layout>
-          
-  
-            <!-- <p class="warning"><strong>Warning:</strong> if you're not using headphones, pressing play will cause feedback.</p>
-        
-            <p>Display the video stream from <code>getUserMedia()</code> in a video element.</p>
-        
-            <p>The <code>MediaStream</code> object <code>stream</code> passed to the <code>getUserMedia()</code> callback is in global scope, so you can inspect it from the console.</p> -->
         </v-container>
       </v-content>
     </v-app>
@@ -124,6 +117,8 @@
   <script src="https://unpkg.com/vue/dist/vue.js"></script>
   <script src="https://unpkg.com/vuetify/dist/vuetify.js"></script>
   <script type='text/javascript' src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
   <!-- <script type='text/javascript' src="./js/webRTC.js"></script> -->
   <script>
       const camera = Vue.component('camera', {
@@ -192,7 +187,8 @@
             showEnableCameraButton: false,
             showVideoFeed: false,
             showCanvas: false,
-            photo: null
+            photo: null,
+            isLoading: false
           }
         },
         mounted() {
@@ -205,12 +201,29 @@
           })
         },
         methods: {
+          uploadImage(photo) {
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+                timeout: 30000
+                
+              };
+            const formData = new FormData();
+            this.photo = photo;
+            formData.append('file', photo, 'screenshot.png');
+            axios.post('/api/uploadPhoto', formData, config)
+            .then(successURL => {
+              console.log(successURL)
+            })
+            .catch(console.error)
+          },         
           takePhoto() {
             var canvas = window.canvas = document.querySelector('canvas');
             canvas.width = this.$refs.camera.$refs.innerCamera.videoWidth;
             canvas.height = this.$refs.camera.$refs.innerCamera.videoHeight;
             canvas.getContext('2d').drawImage(this.$refs.camera.$refs.innerCamera, 0, 0, canvas.width, canvas.height);
-            this.photo = canvas.toDataURL('image/png');
+            canvas.toBlob(this.uploadImage)            
           },
           enableCamera() {
             this.$refs.camera.connectToCamera()

@@ -7,9 +7,9 @@ const API_ID = process.env.KAIROS_API_ID;
 const API_KEY = process.env.KAIROS_API_KEY;
 
 const headers = {
-	"Content-Type": "application/json",
-	"app_id": API_ID,
-	"app_key": API_KEY
+  'Content-Type': 'application/json',
+  app_id: API_ID,
+  app_key: API_KEY,
 };
 
 const KAIROS_GALLERY_ID = 'docusign-hackathon';
@@ -17,7 +17,7 @@ const KAIROS_GALLERY_ID = 'docusign-hackathon';
 const client = axios.create({
   baseURL: 'https://api.kairos.com',
   timeout: 10000,
-  headers: headers
+  headers,
 });
 
 router.route('/verifyImage')
@@ -36,7 +36,7 @@ router.route('/verifyImage')
         res.send(response.data);
       })
       .catch((e) => {
-        console.log(e);
+        console.error(e);
         res.status(500).send(e);
       });
   });
@@ -57,7 +57,7 @@ router.route('/addImage')
         res.send(response.data);
       })
       .catch((e) => {
-        console.log(e);
+        console.error(e);
         res.status(500).send(e);
       });
   });
