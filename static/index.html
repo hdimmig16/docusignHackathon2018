@@ -32,48 +32,90 @@
   <div id="app">
     <v-app>
       <v-content>
-        <v-container>
-          <v-layout>
-              <canvas v-show="showCanvas"></canvas>
+        <v-container :style="{'height':'100vh', 'min-height': 'min-content'}">
+            <v-jumbotron color="grey lighten-2" height="min-content">
+                <v-container fill-height>
+                  <v-layout align-center text-xs-center>
+                    <v-flex>
+                      <h3 class="display-2">
+                        <v-layout wrap v-if="$vuetify.breakpoint.xsOnly">
+                          <v-flex xs12 sm6>
+                              Putting a <v-icon large class="info--text">face</v-icon> 
+                          </v-flex>
+                          <v-flex xs12 sm6>
+                              to a private <v-icon large class="info--text">vpn_key</v-icon>  
+                          </v-flex>
+                        </v-layout>
+                        <div v-else>
+                            Putting a 
+                            <v-icon large class="info--text">face</v-icon> 
+                            to a private <v-icon large class="info--text">vpn_key</v-icon>  
+                        </div>
+                      </h3>
+                      <p class="title mt-2">Facial recognition and photo confirmation for DocuSign</p>
+                      <p class="subheading mt-4">We all know DocuSign meets legal requirements – More than 300,000 businesses and organizations worldwide depend on just that. But some companies desire additional restrictions on exactly who can access documents and deeper insight into who <strong>really</strong> clicked sign.</p>
+                      <v-divider class="mb-4 mt-4"></v-divider>
+                      <v-layout wrap text-xs-center></v-layout>
+                        <v-flex xs12 class="title mb-3 mt-3" v-if="showEnableCameraButton"> Your device supports a webcam – Check out our new features!</v-flex>
+                        <v-flex xs12>
+                          <v-btn 
+                              v-show="showEnableCameraButton"
+                              color="info"
+                              @click.native.stop="enableCamera(); $vuetify.goTo('#demo')" 
+                            >
+                            Enable Camera Access
+                          </v-btn>
+                      </v-flex>
+                      </v-layout>
+                    </v-flex>
+                  </v-layout>
+                </v-container>
+              </v-jumbotron>
+          </v-container>
+        </v-container>
+        <v-container id="demo" :style="{'min-height': '500px'}">
+          <v-layout align-center justify-center>
+              <canvas v-show="showCanvas && showVideoFeed"></canvas>
           </v-layout>
-          <v-layout wrap>
-            <v-flex xs12>
-                <v-btn 
+          <v-layout wrap align-center justify-center>
+            
+              <v-btn 
                 v-show="showEnableCameraButton"
                 :color="showVideoFeed ? 'error' : 'info'"
                 @click.native.stop="showVideoFeed ?  disableCamera() : enableCamera()"
                 >
                   {{  showVideoFeed ? 'Disable Camera' : 'Enable Camera Access' }}
                 </v-btn>
+            
                 <v-btn 
-                  v-show="showVideoFeed"
-                  color="info"
-                  @click.native.stop="takePhoto"
-                >
-                  Take Photo
-                </v-btn>
-                <v-btn 
-                  v-show="photo && showVideoFeed"
-                  :color="showCanvas ? 'warning' : 'success'"
-                  @click.native.stop="showCanvas = !showCanvas"
-                >
+                v-show="showVideoFeed"
+                color="info"
+                @click.native.stop="takePhoto"
+              >
+                Take Photo
+              </v-btn>
+            
+              <v-btn 
+                v-show="photo && showVideoFeed"
+                :color="showCanvas ? 'warning' : 'success'"
+                @click.native.stop="showCanvas = !showCanvas"
+              >
                 {{  showCanvas ? 'Hide Photo' : 'Show Photo' }}
-                </v-btn>
-                
-            </v-flex>
-            <v-flex xs12 v-show="showVideoFeed">
-                <camera 
-                  ref="camera" 
-                  class="elevation-1"
-                />
-            </v-flex>
+              </v-btn>
+            <camera 
+              v-show="showVideoFeed"
+              ref="camera" 
+              class="elevation-1"
+            />
+
           </v-layout>
-        
-            <p class="warning"><strong>Warning:</strong> if you're not using headphones, pressing play will cause feedback.</p>
+          
+  
+            <!-- <p class="warning"><strong>Warning:</strong> if you're not using headphones, pressing play will cause feedback.</p>
         
             <p>Display the video stream from <code>getUserMedia()</code> in a video element.</p>
         
-            <p>The <code>MediaStream</code> object <code>stream</code> passed to the <code>getUserMedia()</code> callback is in global scope, so you can inspect it from the console.</p>
+            <p>The <code>MediaStream</code> object <code>stream</code> passed to the <code>getUserMedia()</code> callback is in global scope, so you can inspect it from the console.</p> -->
         </v-container>
       </v-content>
     </v-app>
