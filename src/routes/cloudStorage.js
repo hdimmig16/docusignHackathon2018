@@ -53,7 +53,10 @@ router.post('/uploadPhoto', multer.single('file'), (req, res, next) => {
 
     // Make the image public to the web for Kairos
     blob.makePublic().then(() => {
-      res.status(200).send(`Success!\n Image uploaded to ${publicUrl}`);
+      const responseBody = {
+        url: publicUrl
+      }
+      res.status(200).send(responseBody);
     });
   });
 
