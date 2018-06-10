@@ -9,9 +9,9 @@ const {promisify} = require('util'); // http://2ality.com/2017/05/util-promisify
 
 
 const router = express.Router();
-const port = process.env.PORT || 3000
-const host = process.env.HOST || 'localhost'
-const hostUrl = 'http://' + host + ':' + port
+const port = process.env.APP_PORT || 3000
+const host = process.env.APP_HOST || 'localhost'
+const hostUrl = 'https://' + host + ':' + port
 const clientID = process.env.DS_CLIENT_ID || '4e6848d3-3664-4678-89ab-d9984b5b1a45';
 const clientSecret = process.env.DS_CLIENT_SECRET;
 const signerEmail = process.env.DS_SIGNER_EMAIL || 'borrower3@certainfinancing.com';
@@ -146,6 +146,7 @@ function dsLoginCB2 (req, res, next) {
  * Uses the session.eg saved parameter
  */
 function goPageController (req, res, next) {
+  console.log('received');
   // getting the API client ready
   apiClient = new docusign.ApiClient();
   apiClient.addDefaultHeader('Authorization', 'Bearer ' + req.user.accessToken);
@@ -453,7 +454,7 @@ function embeddedSigning(accountId) {
   // Add a recipient to sign the document, identified by name and email
   // Objects for the SDK can be constructed from an object:
   let signer = docusign.Signer.constructFromObject(
-    {email: signerEmail, name: signerName, recipientId: '1', routingOrder: '1', returnUrlRequest: `${HOST}/success.html`});
+    {email: signerEmail, name: signerName, recipientId: '1', routingOrder: '1', returnUrlRequest: `${host}/success.html`});
 
   //*** important: must set the clientUserId property to embed the recipient!
   // Otherwise the DocuSign platform will treat recipient as remote (an email
