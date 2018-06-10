@@ -90,12 +90,6 @@
                         <v-flex xs12 class="title mb-3 mt-3" v-if="showEnableCameraButton"> Your device supports a webcam – Check out our new features!</v-flex>
                         <v-flex xs12>
                             <v-btn 
-                              :color="showVideoFeed ? 'error' : 'info'"
-                              @click.native.stop="sendStatus()"
-                            >
-                              Send Status
-                            </v-btn>
-                            <v-btn 
                               v-show="showEnableCameraButton"
                               :color="showVideoFeed ? 'error' : 'info'"
                               @click.native.stop="showVideoFeed ?  disableCamera() : enableCamera()"
@@ -130,15 +124,36 @@
                 {{  showCanvas ? 'Hide Photo' : 'Show Photo' }}
               </v-btn>
             <v-layout row>
-              <v-flex xs6>
-                  <v-toolbar-title v-show="showVideoFeed">{{ ownName }}</v-toolbar-title>
+              <v-flex xs12 md6>
+                  <v-toolbar-title class="pl-0 ml-0">
+                    {{ ownName }}
+                    <v-icon
+                      v-if="ownIdentityVerified" 
+                      medium
+                      color="success" 
+                      class="pb-1"
+                      >
+                      check_circle
+                    </v-icon>
+                  </v-toolbar-title>
                   <camera 
                   v-show="showVideoFeed"
                   ref="camera" 
-                  class="elevation-1"
+                  class="elevation-0"
                 />    
               </v-flex>
-              <v-flex xs6>
+              <v-flex xs12 md6>
+                <v-toolbar-title class="pl-0 ml-0">
+                  {{ peerName }}
+                  <v-icon
+                    v-if="peerVerified" 
+                    medium
+                    color="success" 
+                    class="pb-1"
+                  >
+                  check_circle
+                </v-icon>
+                </v-toolbar-title>
                 <div id="remotes"></div> 
               </v-flex>              
             </v-layout>
@@ -254,6 +269,7 @@
               this.showEnableCameraButton = true;
             }
           })
+
           // grab the room from the URL
           var room = 'test-room-roger2'//location.search && location.search.split('?')[1];
           // create our webrtc connection
@@ -276,8 +292,8 @@
                 //webrtc.sendToAll('chat', {data: 'this is my message'})
                 console.log(`joining room ${room}`);
                 webrtc.joinRoom(room, () => {
-                  console.log('sending chat');
                   webrtc.emit('sendIdentity');
+                  webrtc.emit('sendVerificationStatus');
                 });
               }
           });
@@ -291,24 +307,10 @@
             //console.log({type: 'identity', value: this.ownName});
             webrtc.sendToAll('chat', {type: 'identity', value: this.ownName});
           }.bind(this));                    
-          // function showVolume(el, volume) {
-          //     if (!el) return;
-          //     if (volume < -45) { // vary between -45 and -20
-          //         el.style.height = '0px';
-          //     } else if (volume > -20) {
-          //         el.style.height = '100%';
-          //     } else {
-          //         el.style.height = '' + Math.floor((volume + 100) * 100 / 25 - 220) + '%';
-          //     }
-          // }
-          // webrtc.on('channelMessage', function (peer, label, data) {
-              
-          //     if (data.type == 'volume') {
-          //         showVolume(document.getElementById('volume_' + peer.id), data.volume);
-          //     }
-          // });
           webrtc.on('videoAdded', function (video, peer) {
               console.log('video added', peer);
+              webrtc.emit('sendIdentity');
+              webrtc.emit('sendVerificationStatus');
               var remotes = document.getElementById('remotes');
               console.log(!remotes.hasChildNodes());
               // Only let a single person connect over remote
@@ -410,6 +412,7 @@
           changeUser(name) {
             console.log(name);
             this.ownName = name;
+            this.webrtc.emit('sendIdentity');
           },
           uploadImage(photo) {
             const config = {
@@ -433,7 +436,7 @@
           },
           verifyPhoto() {
             const RESPONSE_BODY = {
-              url: this.uploadedPhotoUrl,
+              url: `${this.uploadedPhotoUrl}?ignoreCache=1`,
               subjectId: this.ownName ? this.ownName.toUpperCase() : '',
             }
             console.log(RESPONSE_BODY);
@@ -443,8 +446,15 @@
               if (response.data.ErrCode) {
                 console.log('Could not verify identity');
                 this.ownIdentityVerified = false;
-                this.sendStatus();
+                
+              } else {
+                console.log(response.data);
+                const confidence = response.data.images[0].transaction.confidence;
+                const verified = confidence > 0.70 ? true : false
+                console.log(confidence);
+                this.ownIdentityVerified = verified;
               }
+              this.sendStatus();
             })            
           },
           sendStatus() {
