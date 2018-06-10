@@ -31,8 +31,39 @@
 <body>
   <div id="app">
     <v-app>
+      <v-toolbar
+        flat 
+        color="primary"
+      >
+        <v-spacer></v-spacer>
+        <v-menu offset-y>
+            <v-btn slot="activator" icon color="primary" dark>
+              <v-icon color="white">person</v-icon>
+            </v-btn>
+            <v-list>
+              <v-subheader>Current User</v-subheader>      
+              <v-list-tile>
+                <v-list-tile-title>{{ ownName }}</v-list-tile-title>
+              </v-list-tile>
+              <v-divider></v-divider>  
+              <v-subheader>Switch User</v-subheader>      
+              <v-list-tile v-for="(user, index) in users" :key="user" @click.native="changeUser(user);">
+                <v-list-tile-title>{{ user }}</v-list-tile-title>
+              </v-list-tile>
+            </v-list>
+        </v-menu>        
+        <!-- <v-btn
+          icon
+          round
+        >
+          <v-icon>
+            person
+          </v-icon>
+        </v-btn>   -->
+        
+      </v-toolbar>
       <v-content>
-        <v-container :style="{'height':'25vh', 'min-height': 'min-content'}">
+        <v-container :style="{'color': 'white', 'height':'25vh', 'min-height': 'min-content'}">
             <v-jumbotron color="grey lighten-2" height="min-content">
                 <v-container fill-height>
                   <v-layout align-center text-xs-center>
@@ -138,7 +169,8 @@
                 facingMode: "user" // force front-facing camera
               }
             },
-            webrtc: null
+            webrtc: null,
+
           }
         },
         methods: {
@@ -198,7 +230,12 @@
             peerVerified: false,
             uploadedPhotoUrl: null,
             ownIdentityVerified: false,
-            ownName: "Test Person"
+            ownName: "Roger Hu",
+            currentUser: 'Roger Hu',
+            users: [
+              'Roger Hu',
+              'Harrison Dimmig'
+            ]
           }
         },
         mounted() {
@@ -210,7 +247,7 @@
             }
           })
           // grab the room from the URL
-          var room = 'test-room-roger'//location.search && location.search.split('?')[1];
+          var room = 'test-room-roger2'//location.search && location.search.split('?')[1];
           // create our webrtc connection
           let webrtc = new SimpleWebRTC({
               // the id/element dom element that will hold "our" video
@@ -362,6 +399,10 @@
           // });
         },
         methods: {
+          changeUser(name) {
+            console.log(name);
+            this.ownName = name;
+          },
           uploadImage(photo) {
             const config = {
                 headers: {
@@ -407,11 +448,6 @@
             canvas.toBlob(this.uploadImage)            
           },
           enableCamera() {
-            console.log('getting peers...')
-            this.webrtc.emit('sendVerificationStatus');
-            console.log(this.webrtc);
-            
-            this.webrtc.getPeers();
             this.$refs.camera.connectToCamera()
             .then(stream => {
               console.log(stream);
