@@ -36,7 +36,8 @@ if(process.env.NODE_ENV === 'production') {
   // route registration
   server.use('/api', require('./dist/routes/test'));
   server.use('/api', require('./dist/routes/identity.js'));
-  server.use('/api', require('./src/routes/cloudStorage.js'));
+  server.use('/api', require('./dist/routes/cloudStorage.js'));
+  server.use('/api', require('./dist/routes/cloudDatastore.js'));
 }
 
 // dev routes
@@ -46,6 +47,7 @@ else if(process.env.NODE_ENV === 'dev'){
   server.use('/api', require('./src/routes/test'));
   server.use('/api', require('./src/routes/identity.js'));
   server.use('/api', require('./src/routes/cloudStorage.js'));
+  server.use('/api', require('./src/routes/cloudDatastore.js'));
 
 }
 

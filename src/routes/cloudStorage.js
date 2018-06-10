@@ -16,7 +16,6 @@ const storage = new Storage({
   keyFilename: './googleCreds.json',
   projectId: projectId,
 });
-//Cache-Control:no-cache, max-age=0
 // A bucket is a container for objects (files).
 const bucket = storage.bucket(bucketName);
 
