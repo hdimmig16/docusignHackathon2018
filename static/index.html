@@ -59,6 +59,12 @@
                         <v-flex xs12 class="title mb-3 mt-3" v-if="showEnableCameraButton"> Your device supports a webcam – Check out our new features!</v-flex>
                         <v-flex xs12>
                             <v-btn 
+                              :color="showVideoFeed ? 'error' : 'info'"
+                              @click.native.stop="sendStatus()"
+                            >
+                              Send Status
+                            </v-btn>
+                            <v-btn 
                               v-show="showEnableCameraButton"
                               :color="showVideoFeed ? 'error' : 'info'"
                               @click.native.stop="showVideoFeed ?  disableCamera() : enableCamera()"
@@ -94,6 +100,7 @@
               </v-btn>
             <v-layout row>
               <v-flex xs6>
+                  <v-toolbar-title v-show="showVideoFeed">{{ ownName }}</v-toolbar-title>
                   <camera 
                   v-show="showVideoFeed"
                   ref="camera" 
@@ -189,6 +196,9 @@
             isLoading: false,
             peerName: null,
             peerVerified: false,
+            uploadedPhotoUrl: null,
+            ownIdentityVerified: false,
+            ownName: "Test Person"
           }
         },
         mounted() {
@@ -200,7 +210,7 @@
             }
           })
           // grab the room from the URL
-          var room = 'test-room'//location.search && location.search.split('?')[1];
+          var room = 'test-room-roger'//location.search && location.search.split('?')[1];
           // create our webrtc connection
           let webrtc = new SimpleWebRTC({
               // the id/element dom element that will hold "our" video
@@ -222,10 +232,20 @@
                 console.log(`joining room ${room}`);
                 webrtc.joinRoom(room, () => {
                   console.log('sending chat');
-                  webrtc.sendToAll('chat', {data: 'this is my message'});
+                  webrtc.emit('sendIdentity');
                 });
               }
           });
+          webrtc.on('sendVerificationStatus', function() {
+            console.log('caught verification status event');
+            //console.log({type: 'verification', value: this.ownIdentityVerified});
+            webrtc.sendToAll('chat', {type: 'verification', value: this.ownIdentityVerified});
+          }.bind(this));
+          webrtc.on('sendIdentity', function() {
+            console.log('caught identity sending event');
+            //console.log({type: 'identity', value: this.ownName});
+            webrtc.sendToAll('chat', {type: 'identity', value: this.ownName});
+          }.bind(this));                    
           // function showVolume(el, volume) {
           //     if (!el) return;
           //     if (volume < -45) { // vary between -45 and -20
@@ -268,9 +288,17 @@
             switch (data.type) {
               case "chat":
                 console.log(data);
+                if (data.payload.type === 'identity') {
+                  console.log('peername');
+                  this.peerName = data.payload.value;
+                } else if (data.payload.type === 'verification') {
+                  console.log('verification');
+                  this.peerVerified = data.payload.value;
+                }
               break;
+
             }
-          });
+          }.bind(this));
     
           webrtc.on('videoRemoved', function (video, peer) {
               console.log('video removed ', peer);
@@ -284,7 +312,6 @@
               //console.log('own volume', volume);
               //showVolume(document.getElementById('localVolume'), volume);
           });
-          webrtc.stopLocalVideo();
           this.webrtc = webrtc;
           // // Since we use this twice we put it here
           // function setRoom(name) {
@@ -349,9 +376,29 @@
             axios.post('/api/uploadPhoto', formData, config)
             .then(successURL => {
               console.log(successURL)
+              this.uploadedPhotoUrl = successURL;
+              this.verifyPhoto();
             })
             .catch(console.error)
-          },         
+          },
+          verifyPhoto() {
+            const RESPONSE_BODY = {
+              url: 'https://storage.googleapis.com/docusign-photos/screenshot.png',
+              subjectId: this.ownName ? this.ownName.toUpperCase() : '',
+            }
+            axios.post('/api/verifyImage', RESPONSE_BODY)
+            .then(response => {
+              console.log(response.data);
+              if (response.data.ErrCode) {
+                console.log('Could not verify identity');
+                this.ownIdentityVerified = false;
+                this.sendStatus();
+              }
+            })            
+          },
+          sendStatus() {
+            this.webrtc.emit('sendVerificationStatus')
+          },
           takePhoto() {
             var canvas = window.canvas = document.querySelector('canvas');
             canvas.width = this.$refs.camera.$refs.innerCamera.videoWidth;
@@ -361,6 +408,7 @@
           },
           enableCamera() {
             console.log('getting peers...')
+            this.webrtc.emit('sendVerificationStatus');
             console.log(this.webrtc);
             
             this.webrtc.getPeers();
